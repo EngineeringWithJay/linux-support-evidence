@@ -1,0 +1,12 @@
+{
+  "clock_ticks_per_second": 100,
+  "cpu_percent_one_core": 0.0,
+  "delta_ticks": 0,
+  "pid": 40,
+  "sample_seconds": 2.003059,
+  "source": "/proc/40/stat",
+  "stime_after": 0,
+  "stime_before": 0,
+  "utime_after": 0,
+  "utime_before": 0
+}

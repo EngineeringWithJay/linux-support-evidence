@@ -1,0 +1,1 @@
+PASS: busy >= 20% of one core; fixed <= 5%; fixed < busy/4

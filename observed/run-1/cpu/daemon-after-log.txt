@@ -1,0 +1,2 @@
+READY mode=fixed
+STOPPED signal=SIGTERM

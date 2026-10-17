@@ -1,0 +1,43 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 953B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/debian:bookworm-20250224-slim@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea6426d23c60bdc
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 98B done
+#3 DONE 0.0s
+
+#4 [base 1/1] FROM docker.io/library/debian:bookworm-20250224-slim@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea6426d23c60bdc
+#4 resolve docker.io/library/debian:bookworm-20250224-slim@sha256:12c396bd585df7ec21d5679bb6a83d4878bc4415ce926c9e5ea6426d23c60bdc done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 442B done
+#5 DONE 0.0s
+
+#6 [lab 1/5] RUN rm -f /etc/apt/sources.list.d/debian.sources     && printf '%s\n' 'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20250301T000000Z bookworm main' > /etc/apt/sources.list     && apt-get -o Acquire::Retries=2 update     && apt-get install -y --no-install-recommends procps iproute2 strace coreutils python3     && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [lab 2/5] WORKDIR /lab
+#7 CACHED
+
+#8 [lab 4/5] COPY tools/ /lab/tools/
+#8 CACHED
+
+#9 [lab 3/5] COPY scenarios/ /lab/scenarios/
+#9 CACHED
+
+#10 [lab 5/5] RUN sha256sum /lab/scenarios/* /lab/tools/*.py > /lab/source.sha256
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:8b9d1680991539a52563988cce36426a5b108ffd506e1c674f415bac592be86d done
+#11 exporting config sha256:d2ee303ee518c0f3cb1cd05ebf841075f4eaa1d10741d1cdb5cd8a7a66f990be done
+#11 naming to docker.io/library/linux-support-evidence:1 done
+#11 unpacking to docker.io/library/linux-support-evidence:1 done
+#11 DONE 0.0s

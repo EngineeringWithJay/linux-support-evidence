@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+# The two accepted runs and their raw output are intentionally versionable.
+observed/trial-*/
+observed/run-local-*/
+# Local development history; accepted receipts use the -final names below.
+BUILD_RECORD.md
+observed/clean-build.log
+observed/tests.txt
+observed/no-overwrite-check.txt
+observed/invalid-label-check.txt

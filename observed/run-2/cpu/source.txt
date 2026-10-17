@@ -1,0 +1,21 @@
+     1	"""Synthetic idle daemon: deliberately spins in busy mode; waits in fixed mode."""
+     2	import signal
+     3	import sys
+     4	
+     5	
+     6	def stop(_signal, _frame):
+     7	    print("STOPPED signal=SIGTERM", flush=True)
+     8	    raise SystemExit(0)
+     9	
+    10	
+    11	mode = sys.argv[1]
+    12	if mode not in {"busy", "fixed"}:
+    13	    raise SystemExit("mode must be busy or fixed")
+    14	signal.signal(signal.SIGTERM, stop)
+    15	print(f"READY mode={mode}", flush=True)
+    16	if mode == "busy":
+    17	    while True:
+    18	        pass  # BUG: an idle daemon burns CPU without doing any work.
+    19	else:
+    20	    while True:
+    21	        signal.pause()  # FIX: block until a signal; SIGTERM still shuts down.

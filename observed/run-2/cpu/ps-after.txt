@@ -1,0 +1,2 @@
+  PID  PPID STAT %CPU COMMAND         COMMAND
+   40     7 S     0.0 python3         python3 /lab/scenarios/idle_daemon.py fixed

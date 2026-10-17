@@ -1,0 +1,77 @@
+Synthetic Linux support lab: scenario=port
++ bash -c uname\ -srm\;\ id\;\ dpkg-query\ -W\ procps\ iproute2\ strace\ coreutils\ python3 
+Linux 6.10.14-linuxkit aarch64
+uid=0(root) gid=0(root) groups=0(root)
+coreutils	9.1-1
+iproute2	6.1.0-3
+procps	2:4.0.2-3
+python3	3.11.2-1+b1
+strace	6.1-0.1
+exit_status=0
++ cat /lab/source.sha256 
+f70f154866011e6c22ae1a377cc692444f06acda426e325ddb3eb1c41e3c45fe  /lab/scenarios/cpu.sh
+c971fb4cf903f5db7b62460dd163bce8286f683464d84a6dbdbe47d51f6815f8  /lab/scenarios/idle_daemon.py
+4299a55ae7d5c2c05377dfd291ed88913bb81ac2c5f48c885e1f1ec796c91a55  /lab/scenarios/port.sh
+ad678fb8cbe9314ce25c8766e9e37c6f27a5d3915e46986d5d47d5e26f78220c  /lab/scenarios/run.sh
+d6a0cfcbad1e7252aa6071a714ec2cc63097724440ca340d454841839effe6d0  /lab/scenarios/tcp_service.py
+52ff2e8ec79d6fe31166a6cbdd86ee542b24c7cfe9aa4cb864fc70c4bc989c94  /lab/tools/check_cpu.py
+eef5e2a6f58a5453e9505c03b5324445d7309bd55b7cdcbc61e270dde98da7c3  /lab/tools/compare.py
+6d7f972cfb3bf671be1a34fc0db46d8c7952821f426513af306a8c5f3a11c1ac  /lab/tools/cpu_sample.py
+d9285918ba421adfc5c8d0ce2b009c93e7efef8df01c896c3d4ce72b24b13df2  /lab/tools/probe.py
+ee9d3a41141f64ea4cd8de48197b20c4debac305eaf7b6bb95f330bb13e06895  /lab/tools/test_evidence.py
+exit_status=0
++ ip -brief address 
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+tunl0@NONE       DOWN           
+gre0@NONE        DOWN           
+gretap0@NONE     DOWN           
+erspan0@NONE     DOWN           
+ip_vti0@NONE     DOWN           
+ip6_vti0@NONE    DOWN           
+sit0@NONE        DOWN           
+ip6tnl0@NONE     DOWN           
+ip6gre0@NONE     DOWN           
+exit_status=0
++ python3 /lab/scenarios/tcp_service.py incumbent 8080 
+started_pid=16 log=incumbent.txt
++ cat /tmp/app.env 
+PORT=8080
+exit_status=0
++ python3 /lab/scenarios/tcp_service.py app 8080 
+ERROR service=app bind=127.0.0.1:8080 errno=98 EADDRINUSE
+exit_status=78
++ ss -ltnp \(\ sport\ =\ :8080\ or\ sport\ =\ :8081\ \) 
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+LISTEN 0      8          127.0.0.1:8080      0.0.0.0:*    users:(("python3",pid=16,fd=3))
+exit_status=0
++ python3 /lab/tools/probe.py 8081 app 
+CONNECT 127.0.0.1:8081 failed: errno=111 ECONNREFUSED
+exit_status=2
++ python3 /lab/tools/probe.py 8080 incumbent 
+CONNECT 127.0.0.1:8080 response=service=incumbent status=ok
+exit_status=0
++ printf "PORT=8081\n" > /tmp/app.env
++ cat /tmp/app.env 
+PORT=8081
+exit_status=0
++ python3 /lab/scenarios/tcp_service.py app 8081 
+started_pid=32 log=app-after.txt
++ cat /evidence/app-after.txt 
+READY service=app listen=127.0.0.1:8081
+exit_status=0
++ ss -ltnp \(\ sport\ =\ :8080\ or\ sport\ =\ :8081\ \) 
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess                         
+LISTEN 0      8          127.0.0.1:8080      0.0.0.0:*    users:(("python3",pid=16,fd=3))
+LISTEN 0      8          127.0.0.1:8081      0.0.0.0:*    users:(("python3",pid=32,fd=3))
+exit_status=0
++ python3 /lab/tools/probe.py 8081 app 
+CONNECT 127.0.0.1:8081 response=service=app status=ok
+exit_status=0
++ python3 /lab/tools/probe.py 8080 incumbent 
+CONNECT 127.0.0.1:8080 response=service=incumbent status=ok
+exit_status=0
++ kill -0 32 
+exit_status=0
++ kill -0 16 
+exit_status=0
+PASS scenario=port

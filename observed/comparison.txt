@@ -1,0 +1,4 @@
+PASS: 43 scenario artifacts match after documented normalization
+PASS: CPU counters, fault/recovery outputs, result records and <180s budgets validated in both runs
+PASS: same image config digest and executed-source manifests
+NOT compared for sameness: build.log (cache/progress), timing.txt (wall-clock provenance)

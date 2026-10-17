@@ -1,0 +1,13 @@
+test_cpu_oracle_accepts_contrast (test_evidence.EvidenceTests.test_cpu_oracle_accepts_contrast) ... ok
+test_cpu_oracle_rejects_missing_fault (test_evidence.EvidenceTests.test_cpu_oracle_rejects_missing_fault) ... ok
+test_cpu_oracle_rejects_no_recovery (test_evidence.EvidenceTests.test_cpu_oracle_rejects_no_recovery) ... ok
+test_fault_and_service_identity_are_not_normalized_away (test_evidence.EvidenceTests.test_fault_and_service_identity_are_not_normalized_away) ... ok
+test_open_port_with_wrong_service_is_not_recovery (test_evidence.EvidenceTests.test_open_port_with_wrong_service_is_not_recovery) ... ok
+test_probe_accepts_exact_service (test_evidence.EvidenceTests.test_probe_accepts_exact_service) ... ok
+test_table_pid_timing_and_order_only (test_evidence.EvidenceTests.test_table_pid_timing_and_order_only) ... ok
+test_variable_pid_and_cpu_measurement (test_evidence.EvidenceTests.test_variable_pid_and_cpu_measurement) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.077s
+
+OK

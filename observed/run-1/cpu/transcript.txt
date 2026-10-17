@@ -1,0 +1,132 @@
+Synthetic Linux support lab: scenario=cpu
++ bash -c uname\ -srm\;\ id\;\ dpkg-query\ -W\ procps\ iproute2\ strace\ coreutils\ python3 
+Linux 6.10.14-linuxkit aarch64
+uid=0(root) gid=0(root) groups=0(root)
+coreutils	9.1-1
+iproute2	6.1.0-3
+procps	2:4.0.2-3
+python3	3.11.2-1+b1
+strace	6.1-0.1
+exit_status=0
++ cat /lab/source.sha256 
+f70f154866011e6c22ae1a377cc692444f06acda426e325ddb3eb1c41e3c45fe  /lab/scenarios/cpu.sh
+c971fb4cf903f5db7b62460dd163bce8286f683464d84a6dbdbe47d51f6815f8  /lab/scenarios/idle_daemon.py
+4299a55ae7d5c2c05377dfd291ed88913bb81ac2c5f48c885e1f1ec796c91a55  /lab/scenarios/port.sh
+ad678fb8cbe9314ce25c8766e9e37c6f27a5d3915e46986d5d47d5e26f78220c  /lab/scenarios/run.sh
+d6a0cfcbad1e7252aa6071a714ec2cc63097724440ca340d454841839effe6d0  /lab/scenarios/tcp_service.py
+52ff2e8ec79d6fe31166a6cbdd86ee542b24c7cfe9aa4cb864fc70c4bc989c94  /lab/tools/check_cpu.py
+eef5e2a6f58a5453e9505c03b5324445d7309bd55b7cdcbc61e270dde98da7c3  /lab/tools/compare.py
+6d7f972cfb3bf671be1a34fc0db46d8c7952821f426513af306a8c5f3a11c1ac  /lab/tools/cpu_sample.py
+d9285918ba421adfc5c8d0ce2b009c93e7efef8df01c896c3d4ce72b24b13df2  /lab/tools/probe.py
+ee9d3a41141f64ea4cd8de48197b20c4debac305eaf7b6bb95f330bb13e06895  /lab/tools/test_evidence.py
+exit_status=0
++ ip -brief address 
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+tunl0@NONE       DOWN           
+gre0@NONE        DOWN           
+gretap0@NONE     DOWN           
+erspan0@NONE     DOWN           
+ip_vti0@NONE     DOWN           
+ip6_vti0@NONE    DOWN           
+sit0@NONE        DOWN           
+ip6tnl0@NONE     DOWN           
+ip6gre0@NONE     DOWN           
+exit_status=0
++ python3 /lab/scenarios/idle_daemon.py busy 
+started_pid=16 log=daemon-before.txt
++ ps -eo pid\,ppid\,pcpu\,comm\,args --sort=-pcpu 
+  PID  PPID %CPU COMMAND         COMMAND
+   16     7 96.8 python3         python3 /lab/scenarios/idle_daemon.py busy
+    1     0  0.0 timeout         /usr/bin/timeout --signal=TERM --kill-after=3s 40s /bin/bash /lab/scenarios/run.sh cpu
+    7     1  0.0 bash            /bin/bash /lab/scenarios/run.sh cpu
+   21     7  0.0 ps              ps -eo pid,ppid,pcpu,comm,args --sort=-pcpu
+exit_status=0
++ python3 /lab/tools/cpu_sample.py 16 2 
+{
+  "clock_ticks_per_second": 100,
+  "cpu_percent_one_core": 99.22,
+  "delta_ticks": 199,
+  "pid": 16,
+  "sample_seconds": 2.005709,
+  "source": "/proc/16/stat",
+  "stime_after": 0,
+  "stime_before": 0,
+  "utime_after": 231,
+  "utime_before": 32
+}
+exit_status=0
++ timeout --signal=INT --kill-after=2s 1s strace -p 16 -o /evidence/strace.txt 
+strace: Process 16 attached
+strace: Process 16 detached
+exit_status=124
++ wc -l /evidence/strace.txt 
+0 /evidence/strace.txt
+exit_status=0
++ kill -0 16 
+exit_status=0
++ nl -ba /lab/scenarios/idle_daemon.py 
+     1	"""Synthetic idle daemon: deliberately spins in busy mode; waits in fixed mode."""
+     2	import signal
+     3	import sys
+     4	
+     5	
+     6	def stop(_signal, _frame):
+     7	    print("STOPPED signal=SIGTERM", flush=True)
+     8	    raise SystemExit(0)
+     9	
+    10	
+    11	mode = sys.argv[1]
+    12	if mode not in {"busy", "fixed"}:
+    13	    raise SystemExit("mode must be busy or fixed")
+    14	signal.signal(signal.SIGTERM, stop)
+    15	print(f"READY mode={mode}", flush=True)
+    16	if mode == "busy":
+    17	    while True:
+    18	        pass  # BUG: an idle daemon burns CPU without doing any work.
+    19	else:
+    20	    while True:
+    21	        signal.pause()  # FIX: block until a signal; SIGTERM still shuts down.
+exit_status=0
++ kill -TERM 16 
+exit_status=0
++ wait 16 
+exit_status=0
+VERIFIED: busy daemon exited and was reaped
++ cat /evidence/daemon-before.txt 
+READY mode=busy
+STOPPED signal=SIGTERM
+exit_status=0
++ python3 /lab/scenarios/idle_daemon.py fixed 
+started_pid=40 log=daemon-after.txt
++ python3 /lab/tools/cpu_sample.py 40 2 
+{
+  "clock_ticks_per_second": 100,
+  "cpu_percent_one_core": 0.0,
+  "delta_ticks": 0,
+  "pid": 40,
+  "sample_seconds": 2.001187,
+  "source": "/proc/40/stat",
+  "stime_after": 0,
+  "stime_before": 0,
+  "utime_after": 0,
+  "utime_before": 0
+}
+exit_status=0
++ ps -p 40 -o pid\,ppid\,stat\,pcpu\,comm\,args 
+  PID  PPID STAT %CPU COMMAND         COMMAND
+   40     7 S     0.0 python3         python3 /lab/scenarios/idle_daemon.py fixed
+exit_status=0
++ python3 /lab/tools/check_cpu.py /evidence 
+PASS: busy >= 20% of one core; fixed <= 5%; fixed < busy/4
+exit_status=0
++ kill -0 40 
+exit_status=0
++ kill -TERM 40 
+exit_status=0
++ wait 40 
+exit_status=0
++ cat /evidence/daemon-after.txt 
+READY mode=fixed
+STOPPED signal=SIGTERM
+exit_status=0
+PASS scenario=cpu
